@@ -9,7 +9,7 @@ function build_graphite_options(options, raw) {
     raw = raw || false;
     var clean_options = [];
     internal_options = ['_t'];
-    graphite_options = ['target', 'targets', 'from', 'until', 'rawData', 'format', 'username', 'password'];
+    graphite_options = ['target', 'targets', 'from', 'until', 'rawData', 'format'];
     graphite_png_options = ['areaMode', 'width', 'height', 'template', 'margin', 'bgcolor',
                          'fgcolor', 'fontName', 'fontSize', 'fontBold', 'fontItalic',
                          'yMin', 'yMax', 'colorList', 'title', 'vtitle', 'lineMode',
@@ -425,8 +425,8 @@ function find_definition (target_graphite, options) {
         var requests = [],
             headers = {};
 
-        if(data.username !== undefined && data.password !== undefined) {
-            headers.Authorization = 'Basic ' + btoa(data.username + ':' + data.password);
+        if(options.username !== undefined && options.password !== undefined) {
+            headers.Authorization = 'Basic ' + btoa(options.username + ':' + options.password);
         }
 
         requests.push($.ajax({
@@ -584,8 +584,8 @@ function find_definition (target_graphite, options) {
         data = build_graphite_options(options, true);
         var headers = {};
 
-        if(data.username !== undefined && data.password !== undefined) {
-            headers.Authorization = 'Basic ' + btoa(data.username + ':' + data.password);
+        if(options.username !== undefined && options.password !== undefined) {
+            headers.Authorization = 'Basic ' + btoa(options.username + ':' + options.password);
         }
 
         $.ajax({
