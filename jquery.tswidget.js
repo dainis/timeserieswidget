@@ -9,7 +9,7 @@ function build_graphite_options(options, raw) {
     raw = raw || false;
     var clean_options = [];
     internal_options = ['_t'];
-    graphite_options = ['target', 'targets', 'from', 'until', 'rawData', 'format'];
+    graphite_options = ['target', 'targets', 'from', 'until', 'rawData', 'format', 'username', 'password'];
     graphite_png_options = ['areaMode', 'width', 'height', 'template', 'margin', 'bgcolor',
                          'fgcolor', 'fontName', 'fontSize', 'fontBold', 'fontItalic',
                          'yMin', 'yMax', 'colorList', 'title', 'vtitle', 'lineMode',
@@ -422,7 +422,13 @@ function find_definition (target_graphite, options) {
 
         }
         data = build_graphite_options(options, true);
-        var requests = [];
+        var requests = [],
+            headers = {};
+
+        if(data.username !== undefined && data.password !== undefined) {
+            headers.Authorization = 'Basic ' + btoa(data.username + ':' + data.password);
+        }
+
         requests.push($.ajax({
             accepts: {text: 'application/json'},
             cache: false,
@@ -430,6 +436,7 @@ function find_definition (target_graphite, options) {
             url: options['graphite_url'],
             type: "POST",
             data: data.join('&'),
+            headers: headers,
             success: function(data, textStatus, jqXHR ) {
                 if(data.length == 0 ) {
                     console.warn("no data in graphite response");
@@ -444,6 +451,7 @@ function find_definition (target_graphite, options) {
                 cache: false,
                 dataType: 'jsonp',
                 jsonp: 'jsonp',
+                headers: headers,
                 url: build_anthracite_url(options, true),
                 success: function(data, textStatus, jqXHR ) { events = data.events },
                 error: function(xhr, textStatus, errorThrown) { on_error(textStatus + ": " + errorThrown); }
@@ -455,6 +463,7 @@ function find_definition (target_graphite, options) {
                 cache: false,
                 dataType: 'json',
                 jsonp: 'json',
+                headers: headers,
                 url: options['es_url'],
                 success: function(data, textStatus, jqXHR ) { es_events = data.hits.hits },
                 error: function(xhr, textStatus, errorThrown) { on_error(textStatus + ": " + errorThrown); }
@@ -573,19 +582,26 @@ function find_definition (target_graphite, options) {
             }
         }
         data = build_graphite_options(options, true);
+        var headers = {};
+
+        if(data.username !== undefined && data.password !== undefined) {
+            headers.Authorization = 'Basic ' + btoa(data.username + ':' + data.password);
+        }
+
         $.ajax({
             accepts: {text: 'application/json'},
             cache: false,
             dataType: 'json',
             type: 'POST',
             data: data.join('&'),
+            headers : headers,
             url: options['graphite_url'],
             error: function(xhr, textStatus, errorThrown) { on_error(textStatus + ": " + errorThrown); }
           }).done(drawRick);
     };
 
 
-    // Default settings. 
+    // Default settings.
     // Override with the options argument for per-case setup
     // or set $.fn.graphite.defaults.<value> for global changes
     $.fn.graphite.defaults = {
